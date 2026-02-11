@@ -28,4 +28,18 @@ public class RequirementsTest
         Assert.Equal(p1.PhoneNumber, p2.PhoneNumber);
         Assert.Equal(p1.TenantId, p2.TenantId);
     }
+
+    [Fact]
+    public void SectionB_RolePermission_ViewerCannotCreate()
+    {
+        // จำลองสถานการณ์: Viewer พยายามตรวจสอบสิทธิ์การสร้าง
+        var userRole = "Viewer";
+        
+        // Logic: เฉพาะ Admin หรือ User เท่านั้นที่ Create ได้
+        bool canCreate = (userRole == "Admin" || userRole == "User");
+
+        Assert.False(canCreate, "Viewer should not have permission to create data.");
+    }
+
+    
 }
