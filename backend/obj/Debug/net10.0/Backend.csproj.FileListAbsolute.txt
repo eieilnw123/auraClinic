@@ -1,0 +1,7 @@
+D:\backend\obj\Debug\net10.0\Backend.csproj.AssemblyReference.cache
+D:\backend\obj\Debug\net10.0\rpswa.dswa.cache.json
+D:\backend\obj\Debug\net10.0\Backend.GeneratedMSBuildEditorConfig.editorconfig
+D:\backend\obj\Debug\net10.0\Backend.AssemblyInfoInputs.cache
+D:\backend\obj\Debug\net10.0\Backend.AssemblyInfo.cs
+D:\backend\obj\Debug\net10.0\Backend.csproj.CoreCompileInputs.cache
+D:\backend\obj\Debug\net10.0\Backend.MvcApplicationPartsAssemblyInfo.cache

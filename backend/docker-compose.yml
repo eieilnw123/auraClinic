@@ -1,0 +1,36 @@
+services:
+  # 1. ฐานข้อมูล PostgreSQL (หัวใจหลักของ Section A)
+  db:
+    image: postgres:15-alpine
+    container_name: clinic_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: clinic_pos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d clinic_pos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 2. Redis สำหรับการทำ Cache (Section D)
+  redis:
+    image: redis:alpine
+    container_name: clinic_redis
+    ports:
+      - "6379:6379"
+
+  # 3. RabbitMQ สำหรับระบบ Messaging (Section C)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: clinic_rabbitmq
+    ports:
+      - "5672:5672"   # สำหรับเชื่อมต่อรับ-ส่ง Message
+      - "15672:15672" # สำหรับดู Dashboard (User: guest / Pass: guest)
+
+volumes:
+  postgres_data:

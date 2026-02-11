@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  # 1. Database: PostgreSQL (Mandatory)
+  db:
+    image: postgres:15-alpine
+    container_name: clinic-db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: clinic_pos
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # 2. Cache: Redis (Section D - Caching)
+  redis:
+    image: redis:alpine
+    container_name: clinic-redis
+    ports:
+      - "6379:6379"
+
+  # 3. Messaging: RabbitMQ (Section C - Messaging)
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: clinic-rabbitmq
+    ports:
+      - "5672:5672"   # Messaging port
+      - "15672:15672" # Management UI
+
+  # 4. Backend: .NET 10 API
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clinic-backend
+    ports:
+      - "5268:5268"
+    depends_on:
+      - db
+      - redis
+      - rabbitmq
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=clinic_pos;Username=admin;Password=password123
+      - Redis__Configuration=redis:6379
+      - RabbitMQ__Host=rabbitmq
+
+  # 5. Frontend: Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinic-frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5268
+
+volumes:
+  postgres_data:
