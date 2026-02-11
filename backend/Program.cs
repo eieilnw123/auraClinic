@@ -2,8 +2,7 @@
 using Backend.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using MassTransit;
-
+using RabbitMQ.Client;
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. Basic Services ---
@@ -23,14 +22,14 @@ builder.Services.AddStackExchangeRedisCache(options => {
     options.Configuration = builder.Configuration["Redis:Configuration"] ?? "redis:6379";
 });
 
-// --- 4. Messaging (Section C - RabbitMQ) ---
-builder.Services.AddMassTransit(x => {
-    x.UsingRabbitMq((context, cfg) => {
-        cfg.Host("rabbitmq", "/", h => {
-            h.Username("guest");
-            h.Password("guest");
-        });
-    });
+// --- Section C: Messaging (RabbitMQ) แบบ Minimal ---
+builder.Services.AddSingleton<IConnectionFactory>(sp => new ConnectionFactory
+{
+    HostName = "rabbitmq",
+    UserName = "guest",
+    Password = "guest",
+    // ลบ DispatchConsumersAsync ออกเพื่อให้รองรับ v7.0+
+    AutomaticRecoveryEnabled = true
 });
 
 // --- 5. Database (Section A - PostgreSQL) ---

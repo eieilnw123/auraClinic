@@ -1,5 +1,5 @@
 services:
-  # 1. ฐานข้อมูล PostgreSQL (หัวใจหลักของ Section A)
+  # 1. Database (PostgreSQL) - Section A
   db:
     image: postgres:15-alpine
     container_name: clinic_db
@@ -9,28 +9,62 @@ services:
       POSTGRES_DB: clinic_pos
     ports:
       - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U admin -d clinic_pos"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
-  # 2. Redis สำหรับการทำ Cache (Section D)
+  # 2. Redis Cache - Section D
   redis:
     image: redis:alpine
     container_name: clinic_redis
     ports:
       - "6379:6379"
 
-  # 3. RabbitMQ สำหรับระบบ Messaging (Section C)
+  # 3. RabbitMQ Messaging - Section C
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: clinic_rabbitmq
     ports:
-      - "5672:5672"   # สำหรับเชื่อมต่อรับ-ส่ง Message
-      - "15672:15672" # สำหรับดู Dashboard (User: guest / Pass: guest)
+      - "5672:5672"
+      - "15672:15672" # Management UI (guest/guest)
+
+  # 4. Backend API (.NET 9)
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: clinic_backend
+    ports:
+      - "5268:5268"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    environment:
+      - ConnectionStrings__DefaultConnection=Host=db;Database=clinic_pos;Username=admin;Password=password123
+      - Redis__Configuration=redis:6379
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5268
+
+  # 5. Frontend (Next.js)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: clinic_frontend
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:5268
 
 volumes:
   postgres_data:
