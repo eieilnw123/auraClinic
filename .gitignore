@@ -1,0 +1,10 @@
+# Ignore Visual Studio temporary files
+.vs/
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+
+# Ignore Node.js files
+node_modules/
+.next/

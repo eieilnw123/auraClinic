@@ -7,7 +7,8 @@ namespace Backend.Data;
 public class AppDbContext(DbContextOptions<AppDbContext> options, ITenantProvider tenantProvider) : DbContext(options)
 {
     public DbSet<Patient> Patients => Set<Patient>();
-
+    public DbSet<User> Users { get; set; }
+    public DbSet<Branch> Branches { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // ข้อมูลจะถูกกรองตาม TenantId อัตโนมัติทุกครั้งที่ดึงข้อมูล
